@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { pool, type PasteRow } from "@/lib/db";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 function getNow(req: NextRequest) {
   if (process.env.TEST_MODE === "1") {
@@ -17,7 +17,7 @@ function getNow(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = params;
+  const { id } = await params;
 
   try {
     const now = getNow(req);
