@@ -70,11 +70,11 @@ export async function POST(req: NextRequest) {
 
       // View-based cleanup
       await client.query(
-        "DELETE FROM pastes WHERE max_views IS NOT NULL AND view_count >= max_views"
+        "DELETE FROM pastes WHERE max_views IS NOT NULL AND views >= max_views"
       );
 
       await client.query(
-        `INSERT INTO pastes (id, content, created_at, expires_at, max_views, view_count)
+        `INSERT INTO pastes (id, content, created_at, expires_at, max_views, views)
          VALUES ($1, $2, $3, $4, $5, 0)`,
         [id, content, now, expiresAt, maxViews]
       );

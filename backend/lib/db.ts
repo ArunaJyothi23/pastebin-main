@@ -16,6 +16,6 @@ export type PasteRow = {
   created_at: string;
   expires_at: string | null;
   max_views: number | null;
-  view_count: number;
+  views: number;
 };
 

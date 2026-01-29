@@ -52,7 +52,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
       if (
         paste.max_views !== null &&
-        paste.view_count >= paste.max_views
+        paste.views >= paste.max_views
       ) {
         await client.query("DELETE FROM pastes WHERE id = $1", [id]);
         await client.query("COMMIT");
@@ -63,7 +63,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       }
 
       const { rows: updatedRows } = await client.query<PasteRow>(
-        "UPDATE pastes SET view_count = view_count + 1 WHERE id = $1 RETURNING *",
+        "UPDATE pastes SET views = views + 1 WHERE id = $1 RETURNING *",
         [id]
       );
 
@@ -73,7 +73,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
       return NextResponse.json({
         content: updated.content,
-        viewCount: updated.view_count,
+        viewCount: updated.views,
         expiresAt: updated.expires_at,
         maxViews: updated.max_views
       });
