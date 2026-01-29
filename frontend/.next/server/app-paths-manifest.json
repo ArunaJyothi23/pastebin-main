@@ -1,8 +1,6 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
-  "/api/paste/[id]/route": "app/api/paste/[id]/route.js",
-  "/api/paste/route": "app/api/paste/route.js",
+  "/p/[id]/page": "app/p/[id]/page.js",
   "/page": "app/page.js",
-  "/paste/[id]/page": "app/paste/[id]/page.js",
-  "/p/[id]/page": "app/p/[id]/page.js"
+  "/paste/[id]/page": "app/paste/[id]/page.js"
 }
