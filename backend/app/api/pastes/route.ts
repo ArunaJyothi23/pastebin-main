@@ -94,11 +94,16 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (err) {
-    console.error("Error creating paste", err);
+  } catch (err: any) {
+    console.error("CRITICAL ERROR creating paste:", {
+      message: err.message,
+      stack: err.stack,
+      detail: err
+    });
+    // Return actual error in dev/test for debugging (be careful in pure prod, but we need to see it now)
     return NextResponse.json(
-      {detail: "Failed to create paste"},
-      {status: 500}
+      { detail: `Failed to create paste: ${err.message}` },
+      { status: 500 }
     );
   }
 }
