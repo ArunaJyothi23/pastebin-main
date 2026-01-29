@@ -1,1 +1,1 @@
-{"/_not-found/page":"/_not-found","/api/pastes/[id]/route":"/api/pastes/[id]","/api/healthz/route":"/api/healthz","/api/paste/route":"/api/paste","/api/pastes/route":"/api/pastes","/api/paste/[id]/route":"/api/paste/[id]","/page":"/"}
+{"/api/paste/[id]/route":"/api/paste/[id]","/api/pastes/[id]/route":"/api/pastes/[id]","/api/healthz/route":"/api/healthz","/_not-found/page":"/_not-found","/api/paste/route":"/api/paste","/api/pastes/route":"/api/pastes","/page":"/"}

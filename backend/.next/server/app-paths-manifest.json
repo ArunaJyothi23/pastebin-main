@@ -1,9 +1,9 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
+  "/api/paste/[id]/route": "app/api/paste/[id]/route.js",
   "/api/pastes/[id]/route": "app/api/pastes/[id]/route.js",
   "/api/healthz/route": "app/api/healthz/route.js",
+  "/_not-found/page": "app/_not-found/page.js",
   "/api/paste/route": "app/api/paste/route.js",
   "/api/pastes/route": "app/api/pastes/route.js",
-  "/api/paste/[id]/route": "app/api/paste/[id]/route.js",
   "/page": "app/page.js"
 }
