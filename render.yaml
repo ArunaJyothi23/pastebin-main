@@ -1,9 +1,10 @@
 services:
   - type: web
-    name: pastebin-lite-express
+    name: pastebin-lite
     runtime: node
-    buildCommand: npm install && npm run build
-    startCommand: npm run start
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
     envVars:
       - key: DATABASE_URL
         sync: false
@@ -11,3 +12,5 @@ services:
         value: production
       - key: TEST_MODE
         value: "1"
+      - key: PORT
+        value: "4000"
