@@ -1,151 +1,77 @@
-## Pastebin Lite Backend Service
+# Pastebin-Lite
 
-This is the backend service for Pastebin Lite, implemented using Next.js API Routes (Node.js + TypeScript) and PostgreSQL (compatible with Neon).
+A minimalist "Pastebin" application built with **Node.js + Express**. This application allows users to create text pastes with optional constraints like Time-to-Live (TTL) and maximum view counts.
 
-### 1. Database Schema (PostgreSQL / Neon)
+## Persistence Layer
+I chose **PostgreSQL** as the persistence layer because:
+- It ensures data survives across serverless application lifecycle (crucial for deployments on Vercel/Render).
+- It supports ACID transactions, which I use to safely decrement view counts and cleanup expired pastes atomically.
+- It is highly scalable and reliable for production-grade ephemeral storage.
 
-Ensure you have a `pastes` table in your Postgres / Neon database with the following schema:
+## Features
+- **Create Pastes:** Set custom TTL (seconds) and maximum view limits.
+- **Dynamic Retrieval:** Automatic deletion once constraints are met.
+- **Deterministic Testing:** Support for `TEST_MODE=1` using the `x-test-now-ms` header for precise expiry validation.
+- **Responsive UI:** A sleek dark-mode interface for ease of use.
 
-```sql
-CREATE TABLE IF NOT EXISTS pastes (
-  id TEXT PRIMARY KEY,
-  content TEXT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  expires_at TIMESTAMPTZ NULL,
-  max_views INT NULL,
-  view_count INT NOT NULL DEFAULT 0
-);
-```
+## Getting Started Locally
 
-### 2. Environment Variables
+### Prerequisites
+- Node.js (v18+)
+- A PostgreSQL connection string (Recommended: [Neon.tech](https://neon.tech))
 
-Create a `.env` file in this `backend/` directory and set your PostgreSQL connection string:
+### Installation
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-```bash
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB_NAME?sslmode=require"
-```
+2. Configure environment variables in a `.env` file:
+   ```env
+   DATABASE_URL=your_postgresql_connection_string
+   PORT=4000
+   TEST_MODE=1
+   ```
 
-- **`DATABASE_URL`**: Your connection string for the PostgreSQL database (e.g., from Neon).
+3. Initialize Database:
+   The application assumes a `pastes` table exists. Run the following SQL if not already created:
+   ```sql
+   CREATE TABLE pastes (
+     id TEXT PRIMARY KEY,
+     content TEXT NOT NULL,
+     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+     expires_at TIMESTAMP WITH TIME ZONE,
+     max_views INTEGER,
+     views INTEGER DEFAULT 0
+   );
+   ```
 
-### 3. Running Locally
+4. Run the application:
+   ```bash
+   npm run dev
+   ```
+   The app will be available at `http://localhost:4000`.
 
-From the `backend/` directory:
+## API Documentation
 
-```bash
-npm install   # or yarn install / pnpm install
-npm run dev   # or yarn dev / pnpm dev
-```
+### Health Check
+`GET /api/healthz`
+- Returns HTTP 200 if the server and database are operational.
 
-The backend API will typically run on `http://localhost:3000` (or `http://localhost:4000` if `frontend` is already running on 3000), serving API routes prefixed with `/api`.
+### Create Paste
+`POST /api/pastes`
+- **Body:** `{ "content": "...", "ttl_seconds": 3600, "max_views": 5 }`
+- **Response:** `{ "id": "...", "url": "..." }`
 
-### 4. Deterministic Time Testing
+### Fetch Paste (JSON)
+`GET /api/pastes/:id`
+- **Response:** `{ "content": "...", "remaining_views": 4, "expires_at": "..." }`
 
-For automated testing of expiry logic, you can control the perceived "current time" by setting `TEST_MODE=1` and providing the `x-test-now-ms` header.
+### View Paste (HTML)
+`GET /p/:id`
+- Returns a rendered HTML view of the paste.
 
-- **`TEST_MODE=1`**: An environment variable that enables test mode.
-- **`x-test-now-ms`**: A request header containing a Unix timestamp in milliseconds. The backend will use this value instead of `Date.now()` for all time-related calculations.
-
-**Example `.env` for testing:**
-
-```bash
-DATABASE_URL="..."
-TEST_MODE=1
-```
-
-### 5. API Routes
-
-Here are the available API routes with `curl` examples. Assume the backend is running at `http://localhost:3000` for these examples.
-
-#### A. `GET /api/healthz`
-
-Checks the health of the API service.
-
-```bash
-curl -X GET \
-  http://localhost:3000/api/healthz
-```
-
-**Example Response (200 OK):**
-```json
-{
-  "status": "ok"
-}
-```
-
-#### B. `POST /api/pastes`
-
-Creates a new paste.
-
-- **Request Body (JSON)**:
-  - `content`: (required, string) The paste content.
-  - `ttl_seconds`: (optional, number) Time-to-live in seconds.
-  - `max_views`: (optional, number) Maximum number of views before expiry.
-
-```bash
-# Example 1: Basic paste
-curl -X POST \
-  -H "Content-Type: application/json" \
-  -d '{"content": "Hello World!"}' \
-  http://localhost:3000/api/pastes
-
-# Example 2: Paste with 60 seconds expiry
-curl -X POST \
-  -H "Content-Type: application/json" \
-  -d '{"content": "Ephemeral text", "ttl_seconds": 60}' \
-  http://localhost:3000/api/pastes
-
-# Example 3: Paste with 5 max views
-curl -X POST \
-  -H "Content-Type: application/json" \
-  -d '{"content": "View me 5 times", "max_views": 5}' \
-  http://localhost:3000/api/pastes
-
-# Example 4: Paste with deterministic time for testing
-# (Assume current time is 1700000000000ms Unix epoch for expiry calculation)
-curl -X POST \
-  -H "Content-Type: application/json" \
-  -H "x-test-now-ms: 1700000000000" \
-  -d '{"content": "Test content with fixed time", "ttl_seconds": 3600}' \
-  http://localhost:3000/api/pastes
-```
-
-**Example Response (201 Created):**
-```json
-{
-  "id": "some_id",
-  "url": "/p/some_id"
-}
-```
-
-#### C. `GET /api/pastes/:id`
-
-Retrieves a paste by its ID, increments its view count, and applies expiry logic. Returns 404 if not found or expired.
-
-```bash
-# Example 1: Fetch a paste
-curl -X GET \
-  http://localhost:3000/api/pastes/some_id
-
-# Example 2: Fetch a paste with deterministic time for testing
-# (Useful for checking if a paste expired at a specific point in time)
-curl -X GET \
-  -H "x-test-now-ms: 1700000000000" \
-  http://localhost:3000/api/pastes/some_id
-```
-
-**Example Response (200 OK):**
-```json
-{
-  "content": "Hello World!",
-  "viewCount": 1,
-  "expiresAt": null,
-  "maxViews": null
-}
-```
-
-**Example Response (404 Not Found):**
-```json
-{
-  "detail": "Paste not found"
-}
-```
+## Important Design Decisions
+- **Unified Architecture:** The frontend UI and backend API are served from the same Express instance to simplify deployment and reduce latency.
+- **Atomic Cleanup:** Every time a paste is created or retrieved, the system perform checks to remove expired or exhausted pastes, keeping the database lean.
+- **Safety:** All HTML content is escaped before rendering to prevent XSS.

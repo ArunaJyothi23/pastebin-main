@@ -78,3 +78,8 @@ agenthub/agents/youtube/db
 
 # Mobile development
 android-sdk/ 
+.env
+*.sqlite
+node_modules/
+backend/node_modules/
+backend/database.sqlite

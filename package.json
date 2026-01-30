@@ -1,0 +1,10 @@
+{
+  "name": "pastebin-lite",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix backend",
+    "start": "npm start --prefix backend",
+    "install-all": "npm install --prefix backend"
+  }
+}
