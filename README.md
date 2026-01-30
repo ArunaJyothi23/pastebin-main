@@ -23,10 +23,10 @@ I chose **PostgreSQL** as the persistence layer because:
 ### Installation
 1. Install dependencies:
    ```bash
-   npm run install-all
+   npm install
    ```
 
-2. Configure environment variables in `backend/.env`:
+2. Configure environment variables in a `.env` file:
    ```env
    DATABASE_URL=your_postgresql_connection_string
    PORT=4000

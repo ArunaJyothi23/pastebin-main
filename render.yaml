@@ -2,8 +2,7 @@ services:
   - type: web
     name: pastebin-lite
     runtime: node
-    rootDir: backend
-    buildCommand: npm run build
+    buildCommand: npm install
     startCommand: npm start
     envVars:
       - key: DATABASE_URL
